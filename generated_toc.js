@@ -32,7 +32,48 @@
     The "quux" heading will not appear in the TOC. To override this,
     add class="generate_for_page" to the container, which will process
     all headings on the page wheresoever they may be.
-
+    
+    ##################
+    ## Modified by Daniel Folkinshteyn <nanotube@users.sourceforge.net>
+    ## August 26, 2008
+    ##################
+    ## 
+    ## List of changes:
+    ## * Added list type specification for the TOC (configurable)
+    ## * Add "back to top" links after each heading that is included in the TOC. (configurable)
+    ## * Made default to show the toc rather than hide it, if there's no cookie.
+    ## * Cosmetic improvements to skip and show/hide links
+    ## * Add some more documentation and examples (see immediately below).
+    
+    Some further documentation:
+    
+    ========
+    To exclude a heading from the TOC, add a "no-TOC" class to it. For example:
+    <h2 class="no-TOC">This will not show up in the TOC</h2>
+    A good place to use this is in specifying a title for your table of contents. For example, you might like the following:
+    <div id="generated-toc">
+        <h2 class="no-TOC">Table of Contents</h2>
+    </div>
+    
+    ========
+    To set the TOC list type (ordered or unordered list), give the div a class of "list_type_ul" or "list_type_ol". For example:
+    <div id="generated-toc" class="list_type_ul"></div>
+    Default is ordered list ('ol'). 
+    
+    ========
+    To enable or disable "back to top" links in the body, give the div a class of "back_to_top_on" or "back_to_top_off". For example:
+    <div id="generated-toc" class="back_to_top_off"></div>
+    The default is "on" - back to top links will be generated after each heading included in the TOC.
+    
+    ========
+    To specify multiple classes for the div, separate them with spaces. For example:
+    <div id="generated-toc" class="generate_from_h3 generate_for_page list_type_ul"></div>
+    
+    ========
+    For conflicting class specifications, the last specified class takes precedence. For example, for the following specification:
+    <div id="generated-toc" class="generate_from_h3 generate_from_h2 list_type_ul list_type_ol"></div>
+    The resulting TOC will be generated from h2, and use ordered list type ('ol'). 
+    
 */
 
 generated_toc = {
@@ -40,6 +81,8 @@ generated_toc = {
     // Identify our TOC element, and what it applies to
     generate_from = '0';
     generate_for = 'unset';
+    list_type = 'ol'; // this is the default TOC list type
+    back_to_top = 'on'; // this is the default setting for back to top links.
     tocparent = document.getElementById('generated-toc');
     if (tocparent) {
       // there is a div class="generated-toc" in the document
@@ -52,6 +95,10 @@ generated_toc = {
           generate_from = classes[i].substr(classes[i].length-1,1);
         } else if (classes[i].match(/^generate_for_[a-z]+$/)) {
           generate_for = classes[i].match(/^generate_for_([a-z])+$/)[1];
+        } else if (classes[i].match(/^list_type_[a-z]+$/)) {
+          list_type = classes[i].match(/^list_type_([a-z])+$/)[1];
+        } else if (classes[i].match(/^back_to_top_[a-z]+$/)) {
+          back_to_top = classes[i].match(/^back_to_top_([a-z])+$/)[1];
         }
       }
     } else {
@@ -81,7 +128,7 @@ generated_toc = {
         generate_from = first_header_found.toLowerCase().substr(1);
       }
     }
-    
+        
     // add all levels of heading we're paying attention to to the
     // headings_to_treat dictionary, ready to be filled in later
     headings_to_treat = {"h6":''};
@@ -111,23 +158,25 @@ generated_toc = {
     
     // first, check if there's a cookie defined to save the state as open
     status = generated_toc.readCookie("generated_toc_display");
-    if (status && status == "open") {
-      display_initially = "block";
-      toggle_initially = "Hide table of contents";
-    } else {
+    
+    // Unless cookie explicitly specifies to start closed, we leave it open.
+    if (status && status == "closed") {
       display_initially = "none";
-      toggle_initially = "Show table of contents";
+      toggle_initially = "[-- show table of contents --]";
+    } else {
+      display_initially = "block";
+      toggle_initially = "[-- hide table of contents --]";
     }
-
+    
     cur_head_lvl = "h" + generate_from;
-    cur_list_el = document.createElement('ul');
+    cur_list_el = document.createElement(list_type);
     cur_list_el.style.display = display_initially;
     p = document.createElement('p');
     span = document.createElement('span');
     span.className = 'hidden';
     a = document.createElement('a');
     a.href = '#aftertoc';
-    a.appendChild(document.createTextNode('skip table of contents'));
+    a.appendChild(document.createTextNode('[-- skip table of contents --]'));
     span.appendChild(a);
     p.appendChild(span);
     tocparent.appendChild(p);
@@ -167,7 +216,7 @@ generated_toc = {
           // there aren't any LIs, so create a new one to add the UL to
           last_listitem_el = document.createElement('li');
         }
-        new_list_el = document.createElement('ul');
+        new_list_el = document.createElement(list_type);
         last_listitem_el.appendChild(new_list_el);
         cur_list_el.appendChild(last_listitem_el);
         cur_list_el = new_list_el;
@@ -188,12 +237,26 @@ generated_toc = {
       a.appendChild(document.createTextNode(generated_toc.innerText(this_head_el)));
       li.appendChild(a);
       cur_list_el.appendChild(li);
+      
+      // create a "back to top" link
+      if (back_to_top == 'on'){
+        newdiv = document.createElement("div");
+        newdiv.innerHTML = "<a href='#beforetoc'>[back to top]</a>";
+        this_head_el.parentNode.insertBefore(newdiv, this_head_el.nextSibling);
+      }
     }
     
     // add an aftertoc paragraph as destination for the skip-toc link
     p = document.createElement('p');
     p.id = 'aftertoc';
     tocparent.appendChild(p);
+    
+    // add a beforetoc paragraph as destination for the back-to-top link
+    if (back_to_top == 'on'){
+      p = document.createElement('p');
+      p.id = 'beforetoc';
+      tocparent.parentNode.insertBefore(p, tocparent)
+    }
     
     // go through the TOC and find all LIs that are "empty", i.e., contain
     // only ULs and no links, and give them class="missing"
@@ -223,7 +286,7 @@ generated_toc = {
     // defined where it's called so it's easier to understand.
     return function(e) {
       d = cur_list_el.style.display;
-      a.firstChild.nodeValue = (d == 'block' ? 'Show' : 'Hide') + ' table of contents';
+      a.firstChild.nodeValue = (d == 'block' ? '[-- show' : '[-- hide') + ' table of contents --]';
       a.className = (d == 'block' ? 'toggle-closed' : 'toggle-open'); 
       cur_list_el.style.display = d == 'block' ? 'none' : 'block';
       // set a cookie to "open" or "closed" to save the state of the TOC
