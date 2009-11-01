@@ -1,6 +1,9 @@
 /** Generated TOC
     Stuart Langridge, July 2007
     
+    ### More detailed documentation on usage can be found here:
+    ### http://wiki.df.dreamhosters.com/wiki/Generated_toc
+    
     Generate a table of contents, based on headings in the page.
     
     To place the TOC on the page, add
@@ -12,10 +15,24 @@
     
     The TOC defaults to displaying all headings that are contained within
     the same element as it itself is contained in (or all headings on the
-    page if you did not provide a generated-toc container). To override this,
+    page if you did not provide a generated-toc container). 
+    
+    To override this,
     provide a "highest heading" value by adding class="generate_from_h3"
-    (or h2, h4, etc) to the container. (If unspecified, this will display all
-    headings, as if class="generate_from_h1" was specified.)
+    (or h2, h4, etc) to the container. This will include headings h3 through
+    h6. (If unspecified, this will display all headings, as if 
+    class="generate_from_h1" was specified.)
+    
+    To limit from the other site, add a 'generate_to' class, such as 
+    "generate_to_h4".
+    
+    Note that the 'order' of headings goes from lower numbers to higher, so
+    that you go "from" h1 "to" h6. So for example, 
+    to limit headings to between h2 and h4, you can specify
+    class="generate_from_h2 generate_to_h4"
+    
+    If you specify a generate_to that is below generate_from, it will be set 
+    to equal generate_from.
     
     The TOC defaults to operating only on headings contained within the same
     element as it itself, i.e., in a page like this:
@@ -44,6 +61,7 @@
     ## * Made default to show the toc rather than hide it, if there's no cookie.
     ## * Cosmetic improvements to skip and show/hide links
     ## * Add some more documentation and examples (see immediately below).
+    ## * Add generate_to config
     
     Some further documentation:
     
