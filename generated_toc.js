@@ -80,6 +80,7 @@ generated_toc = {
   generate: function() {
     // Identify our TOC element, and what it applies to
     generate_from = '0';
+    generate_to = '6';
     generate_for = 'unset';
     list_type = 'ol'; // this is the default TOC list type
     back_to_top = 'on'; // this is the default setting for back to top links.
@@ -99,11 +100,19 @@ generated_toc = {
           list_type = classes[i].match(/^list_type_([a-z]+)$/)[1];
         } else if (classes[i].match(/^back_to_top_[a-z]+$/)) {
           back_to_top = classes[i].match(/^back_to_top_([a-z]+)$/)[1];
+        } else if (classes[i].match(/^generate_to_h[1-6]$/)) {
+          generate_to = classes[i].substr(classes[i].length-1,1);
         }
       }
     } else {
       // They didn't specify a TOC element; exit
       return;
+    }
+    
+    // doesn't make sense to have generate_to less than generate_from
+    // so just quietly set them to equal
+    if (generate_to < generate_from) {
+        generate_to = generate_from
     }
     
     // set top_node to be the element in the document under which
@@ -131,8 +140,9 @@ generated_toc = {
         
     // add all levels of heading we're paying attention to to the
     // headings_to_treat dictionary, ready to be filled in later
-    headings_to_treat = {"h6":''};
-    for (var i=5; i>= parseInt(generate_from); i--) {
+    headings_to_treat = {}
+    headings_to_treat["h" + generate_to] = ''
+    for (var i=parseInt(generate_to) - 1; i>= parseInt(generate_from); i--) {
       headings_to_treat["h" + i] = '';
     }
     
