@@ -94,11 +94,11 @@ generated_toc = {
         if (classes[i].match(/^generate_from_h[1-6]$/)) {
           generate_from = classes[i].substr(classes[i].length-1,1);
         } else if (classes[i].match(/^generate_for_[a-z]+$/)) {
-          generate_for = classes[i].match(/^generate_for_([a-z])+$/)[1];
+          generate_for = classes[i].match(/^generate_for_([a-z]+)$/)[1];
         } else if (classes[i].match(/^list_type_[a-z]+$/)) {
-          list_type = classes[i].match(/^list_type_([a-z])+$/)[1];
+          list_type = classes[i].match(/^list_type_([a-z]+)$/)[1];
         } else if (classes[i].match(/^back_to_top_[a-z]+$/)) {
-          back_to_top = classes[i].match(/^back_to_top_([a-z])+$/)[1];
+          back_to_top = classes[i].match(/^back_to_top_([a-z]+)$/)[1];
         }
       }
     } else {
