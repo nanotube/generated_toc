@@ -136,7 +136,7 @@ generated_toc = {
     // set top_node to be the element in the document under which
     // we'll be analysing headings
     if (generate_for == 'page') {
-      top_node = document.getElementsByTagName('body');
+      top_node = document.body;
     } else {
       // i.e., explicitly set to "parent", left blank (so "unset"),
       // or some invalid value
